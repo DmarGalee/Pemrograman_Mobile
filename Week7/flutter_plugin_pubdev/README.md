@@ -1,5 +1,10 @@
 # Codelabs #07 Manajemen Plugin
 
+Damar Galih Fitrianto 
+-
+2341720200
+-
+
 Praktikum Lankah 2 
 
 ![Screenshot Praktikum Percobaan 2](img/PP2.png)
