@@ -2,7 +2,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:async/async.dart'; // Package async/async diperlukan untuk FutureGroup
+import 'package:async/async.dart';
+import 'package:books/geolocation.dart';
+import '../navigation_first.dart';
+import 'navigation_dialog.dart';
 
 void main() {
   runApp(const MyApp());
@@ -20,7 +23,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: const FuturePage(),
+      home: const NavigationDialogScreen(),
     );
   }
 }
@@ -150,7 +153,7 @@ class _FuturePageState extends State<FuturePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Future Demo')),
+      appBar: AppBar(title: const Text('DmarGalee')),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

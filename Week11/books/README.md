@@ -262,3 +262,176 @@ Tambahkan plugin geolocator dengan mengetik perintah berikut di terminal.
 
 flutter pub add geolocator
 
+Langkah 2: Tambah permission GPS
+Jika Anda menargetkan untuk platform Android, maka tambahkan baris kode berikut di file android/app/src/main/androidmanifest.xml
+
+![alt text](image-15.png)
+
+Langkah 3: Buat file geolocation.dart  
+Tambahkan file baru ini di folder lib project Anda.
+
+Langkah 4: Buat StatefulWidget
+Buat class LocationScreen di dalam file geolocation.dart
+
+Langkah 5: Isi kode geolocation.dart
+
+![alt text](image-16.png)
+
+Soal 11
+Tambahkan nama panggilan Anda pada tiap properti title sebagai identitas pekerjaan Anda.
+
+Langkah 6: Edit main.dart
+Panggil screen baru tersebut di file main Anda seperti berikut.
+
+home: LocationScreen(),
+
+
+Langkah 7: Run
+Run project Anda di device atau emulator (bukan browser), maka akan tampil seperti berikut ini.
+
+![alt text](image-17.png)
+
+Langkah 8: Tambahkan animasi loading
+Tambahkan widget loading seperti kode berikut. Lalu hot restart, perhatikan perubahannya.
+
+![alt text](image-18.png)
+
+
+Soal 12
+- Jika Anda tidak melihat animasi loading tampil, kemungkinan itu berjalan sangat cepat. Tambahkan delay pada method getPosition() dengan kode await Future.delayed(const Duration(seconds: 3));
+- Apakah Anda mendapatkan koordinat GPS ketika run di browser? Mengapa demikian?
+
+![alt text](image-19.png)
+
+
+## Praktikum 7: Manajemen Future dengan FutureBuilder
+
+Langkah 1: Modifikasi method getPosition()
+Buka file geolocation.dart kemudian ganti isi method dengan kode ini.
+
+![alt text](image-20.png)
+
+Langkah 2: Tambah variabel
+Tambah variabel ini di class _LocationScreenState
+
+Langkah 3: Tambah initState()
+Tambah method ini dan set variabel position
+
+![alt text](image-21.png)
+
+Langkah 4: Edit method build()
+Ketik kode berikut dan sesuaikan. Kode lama bisa Anda comment atau hapus.
+
+![alt text](image-22.png)
+
+Soal 13
+Apakah ada perbedaan UI dengan praktikum sebelumnya? Mengapa demikian?
+
+- Ya, ada perbedaan UI.
+Pada praktikum sebelumnya, loading dan hasil ditampilkan berdasarkan variabel myPosition dan setState.
+Pada praktikum ini, UI dikelola otomatis oleh FutureBuilder berdasarkan status Future (waiting, done, error).
+Akibatnya: loading lebih akurat, error bisa ditampilkan, dan kode lebih efisien.
+
+Langkah 5: Tambah handling error
+Tambahkan kode berikut untuk menangani ketika terjadi error. Kemudian hot restart.
+
+else if (snapshot.connectionState == ConnectionState.done) {
+  if (snapshot.hasError) {
+     return Text('Something terrible happened!');
+  }
+  return Text(snapshot.data.toString());
+}
+
+
+Soal 14
+Apakah ada perbedaan UI dengan langkah sebelumnya? Mengapa demikian?
+
+- Iyaa, ada perbedaan UI.
+Pada Langkah 5, pesan sukses berubah dari format latitude-longitude sederhana menjadi toString() objek Position yang lebih panjang.
+Pesan error berubah dari error asli (informatif) menjadi pesan tetap: Something terrible happened!Penyebabnya: Kode di dalam FutureBuilder diganti untuk menangani error secara sederhana dan menampilkan data mentah dari snapshot.data.
+
+## Praktikum 8: Navigation route dengan Future Function
+
+Langkah 1: Buat file baru navigation_first.dart
+
+Buatlah file baru ini di project lib Anda.
+
+Langkah 2: Isi kode navigation_first.dart
+
+![alt text](image-23.png)
+
+Soal 15
+Tambahkan nama panggilan Anda pada tiap properti title sebagai identitas pekerjaan Anda.
+
+Langkah 3: Tambah method di class _NavigationFirstState
+Tambahkan method ini.
+
+![alt text](image-24.png)
+
+Langkah 4: Buat file baru navigation_second.dart
+Buat file baru ini di project lib Anda. Silakan jika ingin mengelompokkan view menjadi satu folder dan sesuaikan impor yang dibutuhkan.
+
+![alt text](image-25.png)
+
+Langkah 6: Edit main.dart
+Lakukan edit properti home.
+
+home: const NavigationFirst(),
+
+Langkah 7: Run  
+Lakukan run, jika terjadi error silakan diperbaiki.
+
+![alt text](image-29.png)
+![alt text](image-26.png)
+![alt text](image-28.png)
+![alt text](image-27.png)
+
+
+Soal 16
+Cobalah klik setiap button, apa yang terjadi ? Mengapa demikian ?
+Gantilah 3 warna pada langkah 5 dengan warna favorit Anda!
+
+Klik "Change Color"
+- Navigator.push() → buka NavigationSecond
+Klik salah satu warna (misal: "Red")
+- Navigator.pop(context, Colors.red.shade700)
+- Kembali ke NavigationFirst + kirim data warna
+Di NavigationFirst, method _navigateAndGetColor menangkap hasilnya:
+
+
+##  Praktikum 9: Memanfaatkan async/await dengan Widget Dialog
+
+Langkah 1: Buat file baru navigation_dialog.dart  
+Buat file dart baru di folder lib project Anda.
+
+Langkah 2: Isi kode navigation_dialog.dart
+
+![alt text](image-30.png)
+
+Langkah 3: Tambah method async
+
+![alt text](image-31.png)
+
+Langkah 4: Panggil method di ElevatedButton
+
+![alt text](image-32.png)
+
+Langkah 5: Edit main.dart
+Ubah properti home
+
+![alt text](image-33.png)
+
+Langkah 6: Run
+Coba ganti warna background dengan widget dialog tersebut. Jika terjadi error, silakan diperbaiki. Jika berhasil, akan tampil seperti gambar berikut.
+
+![alt text](image-34.png)
+
+Soal 17
+Cobalah klik setiap button, apa yang terjadi ? Mengapa demikian ?
+Gantilah 3 warna pada langkah 3 dengan warna favorit Anda!
+
+Saat klik  
+- showDialog menampilkan AlertDialog secara modal.
+- Navigator.pop(context, color)menutup dialog dan mengirim data.
+- await menunggu dialog selesai, lalu setState(() {})memperbarui UI dengan warna baru.
+- Ini adalah cara Flutter menampilkan dialog interaktif dengan pertukaran data.
