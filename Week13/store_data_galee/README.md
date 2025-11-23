@@ -1,21 +1,12 @@
-# #13 | Persistensi Data
+# Codelabs  #13 | Persistensi Data
 
-A new Flutter project.
+> **Nama Praktikan:** DAMAR GALIH FITRIANTO  
+> **Kelas / NIM:**  3G & 2341720200  
+> **Mata Kuliah:** Pemrograman Mobile
+---
+> **Dosen Pengampu:** Habibie Ed Dien
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-
-
+---
 ## Praktikum 1
 
 Soal 1
