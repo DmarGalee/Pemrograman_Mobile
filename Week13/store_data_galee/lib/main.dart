@@ -5,6 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'httphelper.dart';
+import 'pizza_detail.dart';
 
 void main() {
   runApp(const MyApp());
@@ -43,6 +45,12 @@ class _MyHomePageState extends State<MyHomePage> {
   final storage = const FlutterSecureStorage();
   final myKey = 'myPass';
 
+  Future<List<Pizza>> callPizzas() async {
+    HttpHelper helper = HttpHelper();
+    List<Pizza> pizzas = await helper.getPizzaList();
+    return pizzas;
+  }
+
   Future<bool> writeFile() async {
     try {
       await myFile.writeAsString('Damar Galih Fitrinato, 2341720200');
@@ -54,14 +62,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<bool> readFile() async {
     try {
-      // Read the file
       String fileContent = await myFile.readAsString();
       setState(() {
         fileText = fileContent;
       });
       return true;
     } catch (e) {
-      // On error, return false.
       return false;
     }
   }
@@ -84,9 +90,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> deletePreference() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.clear(); // Menghapus SEMUA data yang tersimpan
+    await prefs.clear();
     setState(() {
-      appCounter = 0; // Update UI agar langsung jadi 0
+      appCounter = 0;
     });
   }
 
@@ -140,10 +146,9 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // TextField untuk input password/data
             TextField(
               controller: pwdController,
-              obscureText: true, // agar input seperti password (titik-titik)
+              obscureText: true,
               decoration: const InputDecoration(
                 labelText: 'Masukkan kata sandi / data rahasia',
                 border: OutlineInputBorder(),
@@ -154,7 +159,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
             ElevatedButton(
               onPressed: () async {
-                await writeToSecureStorage(); // Panggil method simpan
+                await writeToSecureStorage();
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Data berhasil disimpan!')),
                 );
@@ -175,8 +180,52 @@ class _MyHomePageState extends State<MyHomePage> {
                 });
               },
             ),
+
+            const SizedBox(height: 40),
+
+            Expanded(
+              child: FutureBuilder(
+                future: callPizzas(),
+                builder:
+                    (
+                      BuildContext context,
+                      AsyncSnapshot<List<Pizza>> snapshot,
+                    ) {
+                      if (snapshot.hasError) {
+                        return const Center(
+                          child: Text('Something went wrong'),
+                        );
+                      }
+                      if (!snapshot.hasData) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      return ListView.builder(
+                        itemCount: snapshot.data!.length,
+                        itemBuilder: (context, index) {
+                          return ListTile(
+                            title: Text(snapshot.data![index].pizzaName),
+                            subtitle: Text(
+                              '${snapshot.data![index].description} - € ${snapshot.data![index].price}',
+                            ),
+                          );
+                        },
+                      );
+                    },
+              ),
+            ),
           ],
         ),
+      ),
+
+      // PENAMBAHAN BARU — POIN 13: FloatingActionButton
+      floatingActionButton: FloatingActionButton(
+        child: const Icon(Icons.add),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const PizzaDetailScreen()),
+          );
+        },
       ),
     );
   }
