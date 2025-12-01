@@ -1,24 +1,42 @@
 import 'package:flutter/material.dart';
-import 'model/pizza.dart';
+import 'pizza.dart';
 import 'httphelper.dart';
 
 class PizzaDetailScreen extends StatefulWidget {
-  const PizzaDetailScreen({super.key});
+  final Pizza pizza;
+  final bool isNew;
+
+  const PizzaDetailScreen({
+    super.key,
+    required this.pizza,
+    required this.isNew,
+  });
 
   @override
   State<PizzaDetailScreen> createState() => _PizzaDetailScreenState();
 }
 
 class _PizzaDetailScreenState extends State<PizzaDetailScreen> {
-  // POIN 8
   final TextEditingController txtId = TextEditingController();
   final TextEditingController txtName = TextEditingController();
   final TextEditingController txtDescription = TextEditingController();
   final TextEditingController txtPrice = TextEditingController();
   final TextEditingController txtImageUrl = TextEditingController();
+
   String operationResult = '';
 
-  // POIN 9 — dispose
+  @override
+  void initState() {
+    if (!widget.isNew) {
+      txtId.text = widget.pizza.id.toString();
+      txtName.text = widget.pizza.pizzaName;
+      txtDescription.text = widget.pizza.description;
+      txtPrice.text = widget.pizza.price.toString();
+      txtImageUrl.text = widget.pizza.imageUrl;
+    }
+    super.initState();
+  }
+
   @override
   void dispose() {
     txtId.dispose();
@@ -29,114 +47,126 @@ class _PizzaDetailScreenState extends State<PizzaDetailScreen> {
     super.dispose();
   }
 
-  Future<void> postPizza() async {
+  Future savePizza() async {
     HttpHelper helper = HttpHelper();
 
-    final int pizzaId = int.tryParse(txtId.text) ?? 0;
-    final String name = txtName.text.isEmpty ? 'Unknown Pizza' : txtName.text;
-    final String desc = txtDescription.text.isEmpty
-        ? 'No description'
-        : txtDescription.text;
-    final double price = double.tryParse(txtPrice.text) ?? 0.0;
-    final String image = txtImageUrl.text.isEmpty ? '' : txtImageUrl.text;
-
-    // BUAT OBJEK PIZZA LANGSUNG DENGAN CONSTRUCTOR YANG BENAR
+    // 🔥 Buat object Pizza baru (karena Pizza immutable)
     Pizza pizza = Pizza(
-      id: pizzaId,
-      pizzaName: name,
-      description: desc,
-      price: price,
-      imageUrl: image,
+      id: int.tryParse(txtId.text) ?? 0,
+      pizzaName: txtName.text,
+      description: txtDescription.text,
+      price: double.tryParse(txtPrice.text) ?? 0.0,
+      imageUrl: txtImageUrl.text,
     );
 
-    String result = await helper.postPizza(pizza);
+    final result = await (widget.isNew
+        ? helper.postPizza(pizza)
+        : helper.putPizza(pizza));
 
     setState(() {
-      if (result.contains('The pizza was posted')) {
-        operationResult = 'Pizza berhasil ditambahkan!';
-      } else {
-        operationResult = result.isEmpty ? 'Success!' : result;
-      }
+      operationResult = result;
     });
+  }
+
+  Future deletePizza() async {
+    HttpHelper helper = HttpHelper();
+    final result = await helper.deletePizza(widget.pizza.id);
+
+    setState(() {
+      operationResult = result;
+    });
+
+    await Future.delayed(const Duration(seconds: 2));
+    if (context.mounted) {
+      Navigator.pop(context);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Pizza Detail'), centerTitle: true),
+      appBar: AppBar(title: const Text('Pizza Detail')),
       body: Padding(
         padding: const EdgeInsets.all(12),
         child: SingleChildScrollView(
           child: Column(
             children: [
-              // Hasil POST
-              Text(
-                operationResult,
-                style: TextStyle(
-                  backgroundColor: Colors.green[200],
-                  color: Colors.black,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+              if (operationResult.isNotEmpty)
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  color: Colors.green[200],
+                  child: Text(operationResult),
                 ),
-                textAlign: TextAlign.center,
-              ),
+
               const SizedBox(height: 24),
 
               TextField(
                 controller: txtId,
-                keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
-                  hintText: 'Insert ID',
+                  labelText: 'ID',
                   border: OutlineInputBorder(),
                 ),
+                keyboardType: TextInputType.number,
               ),
+
               const SizedBox(height: 24),
 
               TextField(
                 controller: txtName,
                 decoration: const InputDecoration(
-                  hintText: 'Insert Pizza Name',
+                  labelText: 'Pizza Name',
                   border: OutlineInputBorder(),
                 ),
               ),
+
               const SizedBox(height: 24),
 
               TextField(
                 controller: txtDescription,
                 decoration: const InputDecoration(
-                  hintText: 'Insert Description',
+                  labelText: 'Description',
                   border: OutlineInputBorder(),
                 ),
               ),
+
               const SizedBox(height: 24),
 
               TextField(
                 controller: txtPrice,
+                decoration: const InputDecoration(
+                  labelText: 'Price',
+                  border: OutlineInputBorder(),
+                ),
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
-                decoration: const InputDecoration(
-                  hintText: 'Insert Price',
-                  border: OutlineInputBorder(),
-                ),
               ),
+
               const SizedBox(height: 24),
 
               TextField(
                 controller: txtImageUrl,
                 decoration: const InputDecoration(
-                  hintText: 'Insert Image Url',
+                  labelText: 'Image URL',
                   border: OutlineInputBorder(),
                 ),
               ),
+
               const SizedBox(height: 48),
 
               ElevatedButton(
-                onPressed: () async {
-                  await postPizza();
-                },
-                child: const Text('Send Post'),
+                onPressed: savePizza,
+                child: Text(widget.isNew ? 'Add Pizza' : 'Update Pizza'),
               ),
+
+              if (!widget.isNew) ...[
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                  onPressed: deletePizza,
+                  child: const Text('Delete Pizza'),
+                ),
+              ],
             ],
           ),
         ),

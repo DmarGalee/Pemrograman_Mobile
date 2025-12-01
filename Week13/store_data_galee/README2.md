@@ -9,4 +9,18 @@
 ---
 ## Praktikum 1
 
-![alt text](praktikum1_W14.png)
+![alt text](P1_W14.png)
+
+## Praktikum 2
+
+![alt text](P2_W14.png)
+
+
+## Praktikum 3
+
+![alt text](P3_W14.png)
+![alt text](P302_W14.png)
+
+## Praktikum 4
+
+![alt text](P4_W14.png)

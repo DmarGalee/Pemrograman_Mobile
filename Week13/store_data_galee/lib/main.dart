@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
-import './model/pizza.dart';
+import 'pizza.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
@@ -144,8 +144,8 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            // === Secure Storage Section ===
             TextField(
               controller: pwdController,
               obscureText: true,
@@ -154,9 +154,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 border: OutlineInputBorder(),
               ),
             ),
-
             const SizedBox(height: 30),
-
             ElevatedButton(
               onPressed: () async {
                 await writeToSecureStorage();
@@ -167,65 +165,144 @@ class _MyHomePageState extends State<MyHomePage> {
               },
               child: const Text('Save Value'),
             ),
-
             const SizedBox(height: 20),
-
             ElevatedButton(
-              child: const Text('Read Value'),
-              onPressed: () {
-                readFromSecureStorage().then((value) {
-                  setState(() {
-                    myPass = value ?? '';
-                  });
+              onPressed: () async {
+                String? value = await readFromSecureStorage();
+                setState(() {
+                  myPass = value ?? '';
                 });
               },
+              child: const Text('Read Value'),
             ),
-
             const SizedBox(height: 40),
 
+            // === Daftar Pizza dengan Full CRUD ===
             Expanded(
-              child: FutureBuilder(
+              child: FutureBuilder<List<Pizza>>(
                 future: callPizzas(),
-                builder:
-                    (
-                      BuildContext context,
-                      AsyncSnapshot<List<Pizza>> snapshot,
-                    ) {
-                      if (snapshot.hasError) {
-                        return const Center(
-                          child: Text('Something went wrong'),
-                        );
-                      }
-                      if (!snapshot.hasData) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                      return ListView.builder(
-                        itemCount: snapshot.data!.length,
-                        itemBuilder: (context, index) {
-                          return ListTile(
-                            title: Text(snapshot.data![index].pizzaName),
-                            subtitle: Text(
-                              '${snapshot.data![index].description} - € ${snapshot.data![index].price}',
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return const Center(
+                      child: Text('Terjadi kesalahan koneksi'),
+                    );
+                  }
+                  if (!snapshot.hasData) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.data!.isEmpty) {
+                    return const Center(child: Text('Belum ada pizza'));
+                  }
+
+                  return ListView.builder(
+                    itemCount: snapshot.data!.length,
+                    itemBuilder: (context, index) {
+                      final pizza = snapshot.data![index];
+
+                      return Dismissible(
+                        key: Key(pizza.id.toString()),
+                        direction: DismissDirection.endToStart,
+                        background: Container(
+                          color: Colors.red,
+                          alignment: Alignment.centerRight,
+                          padding: const EdgeInsets.only(right: 20),
+                          child: const Icon(
+                            Icons.delete,
+                            color: Colors.white,
+                            size: 32,
+                          ),
+                        ),
+                        confirmDismiss: (_) async {
+                          return await showDialog(
+                            context: context,
+                            builder: (ctx) => AlertDialog(
+                              title: const Text('Hapus Pizza?'),
+                              content: Text(
+                                'Yakin hapus "${pizza.pizzaName}"?',
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(ctx, false),
+                                  child: const Text('Batal'),
+                                ),
+                                TextButton(
+                                  onPressed: () => Navigator.pop(ctx, true),
+                                  child: const Text(
+                                    'Hapus',
+                                    style: TextStyle(color: Colors.red),
+                                  ),
+                                ),
+                              ],
                             ),
                           );
                         },
+                        onDismissed: (_) async {
+                          final result = await HttpHelper().deletePizza(
+                            pizza.id,
+                          );
+                          if (mounted) {
+                            ScaffoldMessenger.of(
+                              context,
+                            ).showSnackBar(SnackBar(content: Text(result)));
+                            setState(() {}); // refresh list
+                          }
+                        },
+                        child: ListTile(
+                          leading: const Icon(
+                            Icons.local_pizza,
+                            color: Colors.orange,
+                          ),
+                          title: Text(pizza.pizzaName),
+                          subtitle: Text(
+                            '${pizza.description} - € ${pizza.price}',
+                          ),
+                          trailing: const Icon(Icons.arrow_forward_ios),
+                          onTap: () {
+                            // EDIT PIZZA
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => PizzaDetailScreen(
+                                  pizza: pizza,
+                                  isNew: false, // mode edit
+                                ),
+                              ),
+                            ).then(
+                              (_) => setState(() {}),
+                            ); // refresh setelah kembali
+                          },
+                        ),
                       );
                     },
+                  );
+                },
               ),
             ),
           ],
         ),
       ),
 
-      // PENAMBAHAN BARU — POIN 13: FloatingActionButton
+      // === Floating Action Button untuk Tambah Pizza ===
       floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
+        backgroundColor: Colors.cyan,
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const PizzaDetailScreen()),
-          );
+            MaterialPageRoute(
+              builder: (_) => PizzaDetailScreen(
+                pizza: Pizza(
+                  id: 0,
+                  pizzaName: '',
+                  description: '',
+                  price: 0.0,
+                  imageUrl: '',
+                ),
+                isNew: true, // mode tambah baru
+              ),
+            ),
+          ).then((_) => setState(() {})); // refresh setelah tambah
         },
+        child: const Icon(Icons.add),
       ),
     );
   }
